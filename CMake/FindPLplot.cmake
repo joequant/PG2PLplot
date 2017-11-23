@@ -145,6 +145,16 @@ if( PLplot_INCLUDE_DIR )
     set( PLplot_LIBRARIES ${PLplot_LIBRARIES} ${PLplot_f95_LIBRARY} )
     get_filename_component( PLplot_LIBRARY_DIRS ${PLplot_LIBRARY} PATH )
   endif( PLplot_f95_LIBRARY )
+
+  # Find FORTRAN bindings:
+  find_library( PLplot_fortran_LIBRARY
+    NAMES plplotfortran plplotfortrand
+    PATHS ${lib_locations}
+  )
+  if( PLplot_fortran_LIBRARY )
+    set( PLplot_LIBRARIES ${PLplot_LIBRARIES} ${PLplot_fortran_LIBRARY} )
+  endif( PLplot_fortran_LIBRARY )
+
   
   # Find F95c bindings:
   # Check for COMPILER-SPECIFIC libraries:
