@@ -56,6 +56,7 @@ contains
   
   !*********************************************************************************************************************************
   subroutine do_init()
+    use plplot, only: plinit, plbop
     implicit none
     if(.not. is_init) then
        call plinit()
@@ -76,6 +77,7 @@ end module PG2PLplot
 !! \param ls  Line style
 
 subroutine pgsls(ls)
+  use plplot, only : pllsty
   use PG2PLplot, only : cur_lstyle
   implicit none
   integer, intent(in) :: ls
@@ -117,7 +119,7 @@ end subroutine pgqls
 !! \param lw  Line width
 
 subroutine pgslw(lw)
-  use plplot, only: plflt
+  use plplot, only: plflt, plwidth
   use PG2PLplot, only : cur_lwidth
   implicit none
   integer, intent(in) :: lw
@@ -156,6 +158,7 @@ end subroutine pgqlw
 !! \param cf  Character font
 
 subroutine pgscf(cf)
+  use plplot, only: plfont
   implicit none
   integer, intent(in) :: cf
   
@@ -170,6 +173,7 @@ end subroutine pgscf
 !! \retval cf  Character font
 
 subroutine pgqcf(cf)
+  use plplot, only: plgfont
   implicit none
   integer, intent(out) :: cf
   integer :: family, style, weight
@@ -213,6 +217,7 @@ end subroutine pgqinf
 
 subroutine pgsci(ci1)
   use PG2PLplot, only: cur_color
+  use plplot, only: plcol0
   implicit none
   integer, intent(in) :: ci1
   integer :: ci2,colours(0:15)
@@ -238,6 +243,7 @@ end subroutine pgsci
 !! \param b    Blue colour (0-1)
 
 subroutine pgscr(ci1, r,g,b)
+  use plplot, only: plscol0, plscmap0n
   implicit none
   integer, intent(in) :: ci1
   real, intent(in) :: r,g,b
@@ -268,6 +274,7 @@ end subroutine pgscr
 !! \retval b    Blue colour (0-1)
 
 subroutine pgqcr(ci1, r,g,b)
+  use plplot, only : plgcol0
   implicit none
   integer, intent(in) :: ci1
   real, intent(out) :: r,g,b
@@ -343,6 +350,7 @@ end subroutine pgqcir
 !! \param fs  Fill style (1-4, no match for 2: outline)
 
 subroutine pgsfs(fs)
+  use plplot, only : plpsty
   implicit none
   integer, intent(in) :: fs
   integer :: fs1,fs2, styles(4)
@@ -373,16 +381,18 @@ end subroutine pgsfs
 !! \param ph   Phase of hatching.  Use e.g. 0.0 and 0.5 for double hatching - dummy variable: not used
 
 subroutine pgshs(ang, sep, ph)
+  use plplot, only: plpat
   implicit none
   real, intent(in) :: ang, sep, ph
-  integer :: inc, del, tmp
+  integer :: tmp
+  integer, dimension(1) :: inc, del
   
-  inc = nint(ang*10.)   ! Tenths of a degree
-  del = nint(sep*1000)  ! Spacing in micrometers(!)
+  inc(1) = nint(ang*10.)   ! Tenths of a degree
+  del(1) = nint(sep*1000)  ! Spacing in micrometers(!)
   tmp = nint(ph)
   tmp = tmp  ! Avoid 'variable is set but not used' warnings from compiler for dummy variable
   
-  call plpat(1, inc, del)
+  call plpat(inc, del)
   
 end subroutine pgshs
 !***********************************************************************************************************************************
@@ -394,7 +404,7 @@ end subroutine pgshs
 !! \param ch  Character height
 
 subroutine pgsch(ch)
-  use plplot, only: plflt
+  use plplot, only: plflt, plschr
   use PG2PLplot, only: ch_fac
   
   implicit none
@@ -422,14 +432,15 @@ end subroutine pgsch
 !! \retval ych  The character height for text written with a horizontal baseline (the usual case)
 
 subroutine pgqcs(unit, xch, ych)
-  use plplot, only: plflt
+  use plplot, only: plflt, plgchr, plgpage
   use PG2PLplot, only: mm_per_inch
   
   implicit none
   integer, intent(in) :: unit
   real, intent(out) :: xch, ych
   real(kind=plflt) :: ch1,ch2
-  real(kind=plflt) xp, yp, xleng, yleng, xoff, yoff
+  real(kind=plflt) xp, yp
+  integer :: xleng, yleng, xoff, yoff
   call plgchr(ch1,ch2)
   if(unit.eq.2) then
      xch = real(ch2)
@@ -454,7 +465,7 @@ end subroutine pgqcs
 !! \param ch  Character height
 
 subroutine pgqch(ch)
-  use plplot, only: plflt
+  use plplot, only: plflt, plgchr
   use PG2PLplot, only: ch_fac
   
   implicit none
@@ -763,7 +774,7 @@ end subroutine pgconf
 !! \note  Angle only correct for 0,90,180,270deg or square viewport
 
 subroutine pgptxt(x1,y1,ang,just1,text)
-  use plplot, only: plflt, plptex
+  use plplot, only: plflt, plptex, plgvpw
   
   implicit none
   real, intent(in) :: x1,y1,ang,just1
@@ -961,6 +972,8 @@ end subroutine pglabel
 function pgopen(pgdev)
   use plplot, only: plspause, plsfnam, plsdev
   use plplot, only: plmkstrm, plsetopt
+  use plplot, only: plmkstrm, plssub, plsdev
+  use plplot, only: plsfnam, plfontld, plspause
   use PG2PLplot, only : is_init, devid
   implicit none
   integer :: pgopen
@@ -1022,6 +1035,7 @@ end subroutine pgqid
 
 subroutine pgbegin(i,pgdev,nx,ny)
   use plplot, only: plspause, plsfnam, plsetopt, plssub, plsdev
+  use plplot, only: plfontld
   use PG2PLplot, only : is_init
   implicit none
   integer, intent(in) :: i,nx,ny
@@ -1075,6 +1089,7 @@ end subroutine pgbeg
 !!
 
 subroutine pgend()
+  use plplot, only: plflush, plend1
   implicit none
   
   call plflush()
@@ -1091,7 +1106,7 @@ end subroutine pgend
 
 subroutine pgpap(width,ratio)
   use PG2PLplot, only: paper_width, paper_ratio, do_init
-  use plplot, only : plflt
+  use plplot, only : plflt, plspage
   implicit none
   real, intent(in) :: width, ratio
   integer :: xlen,ylen,xoff,yoff
@@ -1124,7 +1139,7 @@ end subroutine pgpap
 !! \param yt1  Top side of the y-axis
 
 subroutine pgsvp(xl1,xr1,yb1,yt1)
-  use plplot, only: plflt
+  use plplot, only: plflt, plvpor
   
   implicit none
   real, intent(in) :: xl1,xr1,yb1,yt1
@@ -1151,7 +1166,7 @@ end subroutine pgsvp
 !! \param ymax1  Bottom
 
 subroutine pgswin(xmin1,xmax1,ymin1,ymax1)
-  use plplot, only: plflt
+  use plplot, only: plflt, plwind
   
   implicit none
   real, intent(in) :: xmin1,xmax1,ymin1,ymax1
@@ -1177,7 +1192,7 @@ end subroutine pgswin
 !! \param ymax1  Bottom
 
 subroutine pgwindow(xmin1,xmax1,ymin1,ymax1)
-  use plplot, only: plflt
+  use plplot, only: plflt, plwind
   
   implicit none
   real, intent(in) :: xmin1,xmax1,ymin1,ymax1
@@ -1200,6 +1215,7 @@ end subroutine pgwindow
 !! \param nysub   Number of subticks on the y-axis
 
 subroutine pgsubp(nxsub, nysub)
+  use plplot, only : plssub
   implicit none
   integer, intent(in) :: nxsub,nysub
   
@@ -1215,6 +1231,7 @@ end subroutine pgsubp
 
 subroutine pgpage()
   use PG2PLplot, only: do_init
+  use plplot, only : pladv
   implicit none
   
   call pladv(0)
@@ -1316,7 +1333,7 @@ end subroutine pgbox
 !! \param lbl     text of label (may be blank)
 
 subroutine pgtick(x1, y1, x2, y2, pos, tikl, tikr,  disp, orient, lbl)
-  use plplot, only: plflt, plmtex
+  use plplot, only: plflt, plmtex, plgvpw, pljoin
   
   implicit none
   real, intent(in) :: x1, y1, x2, y2, pos, tikl, tikr, disp, orient
@@ -1542,7 +1559,7 @@ end subroutine pg2pldev
 
 subroutine pgslct(pgdev)
   use PG2PLplot, only: do_init
-  use plplot, only : plspause, plgdev
+  use plplot, only : plspause, plgdev, pleop, plsstrm
   
   implicit none
   integer, intent(in) :: pgdev
@@ -1718,6 +1735,7 @@ end subroutine pgpt1
 !!
 
 subroutine pgclos()
+  use plplot, only: plend1
   implicit none
   call plend1()
 end subroutine pgclos
@@ -1832,13 +1850,14 @@ end subroutine pgqci
 !! \retval y2  Top
 
 subroutine pgqvp(units, x1, x2, y1, y2)
-  use plplot, only: plflt
+  use plplot, only: plflt, plgpage, plgvpd, plgpage
   use PG2PLplot, only : mm_per_inch
   implicit none
   integer, intent(in) :: units
   real, intent(out) :: x1, x2, y1, y2
   real(kind=plflt) x1d, x2d, y1d, y2d
-  real(kind=plflt) xp, yp, xleng, yleng, xoff, yoff
+  real(kind=plflt) xp, yp
+  integer xleng, yleng, xoff, yoff
   
   call plgvpd(x1d, x2d, y1d, y2d)
   if(units .ne. 0) then
@@ -1873,12 +1892,13 @@ end subroutine pgqvp
 
 !> \brief get view surface
 subroutine pgqvsz(units, x1, x2, y1, y2)
-  use plplot, only: plflt
+  use plplot, only: plflt, plgpage
   use PG2PLplot, only : mm_per_inch
   implicit none
   integer, intent(in) :: units
   real, intent(out) :: x1, x2, y1, y2
-  real(kind=plflt) xp, yp, xleng, yleng, xoff, yoff
+  real(kind=plflt) xp, yp
+  integer xleng, yleng, xoff, yoff
   
   x1 = 0.0
   y1 = 0.0
@@ -1936,7 +1956,7 @@ end subroutine pgiden
 !! \retval y2  Top
 
 subroutine pgqwin(x1, x2, y1, y2)
-  use plplot, only: plflt
+  use plplot, only: plflt, plgspa
   implicit none
   real, intent(out) :: x1, x2, y1, y2
   real(kind=plflt) :: xmin, xmax, ymin, ymax
@@ -2049,7 +2069,7 @@ end subroutine pgask
 !! \param axis  Controls the plotting of axes, tick marks, etc
 
 subroutine pgenv(xmin, xmax, ymin, ymax, just, axis)
-  use plplot, only: plflt
+  use plplot, only: plflt, plenv
   implicit none
   real, intent(in) :: xmin, xmax, ymin, ymax
   integer, intent(in) :: just, axis
@@ -2118,7 +2138,7 @@ end subroutine pgerry
 !! \param ytop    Vertical coordinate of top edge of viewport, in inches from bottom of view surface
 
 subroutine pgvsiz(xleft, xright, ybot, ytop)
-  use plplot, only: plflt
+  use plplot, only: plflt, plsvpa
   implicit none
   real, intent(in) :: xleft, xright, ybot, ytop
   real(kind=plflt) :: x1p, x2p, y1p, y2p
