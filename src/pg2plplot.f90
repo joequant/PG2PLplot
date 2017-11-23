@@ -968,6 +968,7 @@ function pgopen(pgdev)
   
   integer :: cur_stream=0, check_error
   character :: pldev*(99),filename*(99)
+  integer :: iret
   
   filename = 'plot_temp.png'
   
@@ -982,7 +983,7 @@ function pgopen(pgdev)
      end if
      call plsfnam(trim(filename))       ! Set output file name
   else
-     call plsetopt("db", "")
+     iret = plsetopt("db", "")
   end if
   
   !call plscolbg(255,255,255)           ! Set background colour to white
@@ -1027,6 +1028,7 @@ subroutine pgbegin(i,pgdev,nx,ny)
   character, intent(in) :: pgdev*(*)
   integer :: i1, check_error
   character :: pldev*(99),filename*(99)
+  integer :: iret
   
   ! These are ignored by pgbegin. Can't be self, since calling arguments are likely constants
   i1 = i
@@ -1040,7 +1042,7 @@ subroutine pgbegin(i,pgdev,nx,ny)
      if(check_error(trim(filename)).ne.0) return
      call plsfnam(trim(filename))       ! Set output file name
   else
-     call plsetopt("db", "")
+     iret = plsetopt("db", "")
   end if
   
   call plfontld(1)                      ! Load extended character set(?)
